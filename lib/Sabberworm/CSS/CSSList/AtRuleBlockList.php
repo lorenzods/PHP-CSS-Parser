@@ -35,9 +35,13 @@ class AtRuleBlockList extends CSSBlockList implements AtRule {
 		if($sArgs) {
 			$sArgs = ' ' . $sArgs;
 		}
+		$content = parent::render($oOutputFormat);
+		if ($content === null) {
+			return null;
+		}
 		$sResult = "@{$this->sType}$sArgs{$oOutputFormat->spaceBeforeOpeningBrace()}{";
-		$sResult .= parent::render($oOutputFormat);
-		$sResult .= '}';
+		$sResult.= $content;
+		$sResult.= '}';
 		return $sResult;
 	}
 

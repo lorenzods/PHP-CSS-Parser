@@ -98,6 +98,24 @@ class Document extends CSSBlockList {
 		return parent::render($oOutputFormat);
 	}
 
+	public function getDeclarationBlocksWithCSSPath( $css_path ) {
+		$retval = array();
+		foreach ($this->getAllDeclarationBlocks() as $blk) {
+			$found = false;
+			foreach ($blk->getSelectors() as $sel) {
+				if ($sel->matchesWithCSSPath( $css_path )) {
+					$found = true;
+					break;
+				}
+			}
+			if (!$found) {
+				continue;
+			}
+			$retval[] = $blk;
+		}
+		return $retval;
+	}
+
 	public function isRootList() {
 		return true;
 	}

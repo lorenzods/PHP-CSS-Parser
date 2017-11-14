@@ -18,6 +18,7 @@ use Sabberworm\CSS\Parsing\OutputException;
 class DeclarationBlock extends RuleSet {
 
 	private $aSelectors;
+	protected $bVisible = true;
 
 	public function __construct($iLineNo = 0) {
 		parent::__construct($iLineNo);
@@ -87,7 +88,7 @@ class DeclarationBlock extends RuleSet {
 	public function createShorthands() {
 		$this->createBackgroundShorthand();
 		$this->createDimensionsShorthand();
-		// border must be shortened after dimensions 
+		// border must be shortened after dimensions
 		$this->createBorderShorthand();
 		$this->createFontShorthand();
 		$this->createListStyleShorthand();
@@ -446,7 +447,7 @@ class DeclarationBlock extends RuleSet {
 
 	/*
 	 * Looks for long format CSS dimensional properties
-	 * (margin, padding, border-color, border-style and border-width) 
+	 * (margin, padding, border-color, border-style and border-width)
 	 * and converts them into shorthand CSS properties.
 	 * */
 
@@ -501,7 +502,7 @@ class DeclarationBlock extends RuleSet {
 						$oNewRule->addValue($aValues['bottom']);
 					}
 				} else {
-					// No sides are equal 
+					// No sides are equal
 					$oNewRule->addValue($aValues['top']);
 					$oNewRule->addValue($aValues['left']);
 					$oNewRule->addValue($aValues['bottom']);
@@ -516,8 +517,8 @@ class DeclarationBlock extends RuleSet {
 	}
 
 	/**
-	 * Looks for long format CSS font properties (e.g. <tt>font-weight</tt>) and 
-	 * tries to convert them into a shorthand CSS <tt>font</tt> property. 
+	 * Looks for long format CSS font properties (e.g. <tt>font-weight</tt>) and
+	 * tries to convert them into a shorthand CSS <tt>font</tt> property.
 	 * At least font-size AND font-family must be present in order to create a shorthand declaration.
 	 * */
 	public function createFontShorthand() {
@@ -595,14 +596,35 @@ class DeclarationBlock extends RuleSet {
 	}
 
 	public function render(\Sabberworm\CSS\OutputFormat $oOutputFormat) {
+		if (!$this->isVisible()) {
+			return null;
+		}
 		if(count($this->aSelectors) === 0) {
 			// If all the selectors have been removed, this declaration block becomes invalid
 			throw new OutputException("Attempt to print declaration block with missing selector", $this->iLineNo);
 		}
+		$content = parent::render($oOutputFormat);
+		if ($content === null) {
+			return null;
+		}
 		$sResult = $oOutputFormat->implode($oOutputFormat->spaceBeforeSelectorSeparator() . ',' . $oOutputFormat->spaceAfterSelectorSeparator(), $this->aSelectors) . $oOutputFormat->spaceBeforeOpeningBrace() . '{';
-		$sResult .= parent::render($oOutputFormat);
+		$sResult.= $content;
 		$sResult .= '}';
 		return $sResult;
+	}
+
+	/**
+	 * @param bool $visible is CSSList visible
+	 */
+	public function setVisible( $visible = true ) {
+		$this->bVisible = $visible;
+	}
+
+	/**
+	 * @return bool CSSList visibility
+	 */
+	public function isVisible() {
+		return $this->bVisible;
 	}
 
 }

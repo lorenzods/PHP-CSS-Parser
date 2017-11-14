@@ -17,6 +17,7 @@ abstract class CSSList implements Renderable, Commentable {
 	protected $aComments;
 	protected $aContents;
 	protected $iLineNo;
+	protected $bVisible = true;
 
 	public function __construct($iLineNo = 0) {
 		$this->aComments = array();
@@ -94,9 +95,13 @@ abstract class CSSList implements Renderable, Commentable {
 	}
 
 	public function render(\Sabberworm\CSS\OutputFormat $oOutputFormat) {
+		if (!$this->isVisible()) {
+			return null;
+		}
 		$sResult = '';
 		$bIsFirst = true;
 		$oNextLevel = $oOutputFormat;
+		$bEmpty = true;
 		if(!$this->isRootList()) {
 			$oNextLevel = $oOutputFormat->nextLevel();
 		}
@@ -107,6 +112,7 @@ abstract class CSSList implements Renderable, Commentable {
 			if($sRendered === null) {
 				continue;
 			}
+			$bEmpty = false;
 			if($bIsFirst) {
 				$bIsFirst = false;
 				$sResult .= $oNextLevel->spaceBeforeBlocks();
@@ -114,6 +120,9 @@ abstract class CSSList implements Renderable, Commentable {
 				$sResult .= $oNextLevel->spaceBetweenBlocks();
 			}
 			$sResult .= $sRendered;
+		}
+		if ($bEmpty) {
+			return null;
 		}
 
 		if(!$bIsFirst) {
@@ -123,7 +132,7 @@ abstract class CSSList implements Renderable, Commentable {
 
 		return $sResult;
 	}
-	
+
 	/**
 	* Return true if the list can not be further outdented. Only important when rendering.
 	*/
@@ -152,6 +161,20 @@ abstract class CSSList implements Renderable, Commentable {
 	 */
 	public function setComments(array $aComments) {
 		$this->aComments = $aComments;
+	}
+
+	/**
+	 * @param bool $visible is CSSList visible
+	 */
+	public function setVisible( $visible = true ) {
+		$this->bVisible = $visible;
+	}
+
+	/**
+	 * @return bool CSSList visibility
+	 */
+	public function isVisible() {
+		return $this->bVisible;
 	}
 
 }

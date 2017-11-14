@@ -31,12 +31,16 @@ class AtRuleSet extends RuleSet implements AtRule {
 	}
 
 	public function render(\Sabberworm\CSS\OutputFormat $oOutputFormat) {
+		$content = parent::render($oOutputFormat);
+		if ($content === null) {
+			return null;
+		}
 		$sArgs = $this->sArgs;
 		if($sArgs) {
 			$sArgs = ' ' . $sArgs;
 		}
 		$sResult = "@{$this->sType}$sArgs{$oOutputFormat->spaceBeforeOpeningBrace()}{";
-		$sResult .= parent::render($oOutputFormat);
+		$sResult .= $content;
 		$sResult .= '}';
 		return $sResult;
 	}

@@ -71,4 +71,9 @@ class Selector {
 		return $this->iSpecificity;
 	}
 
+	public function matchesWithCSSPath( $css_path ) {
+		// imbecil checking
+		return (strpos( $this->sSelector , $css_path )!==false);
+	}
+
 }
