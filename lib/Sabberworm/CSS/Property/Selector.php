@@ -37,6 +37,7 @@ class Selector {
 
 	private $sSelector;
 	private $iSpecificity;
+	private $aSegments = null;
 
 	public function __construct($sSelector, $bCalculateSpecificity = false) {
 		$this->setSelector($sSelector);
@@ -58,6 +59,39 @@ class Selector {
 		return $this->getSelector();
 	}
 
+
+	public function getSegmentsFromString( $str ) {
+		$delim = ' >+~';
+		$retval = array();
+		$s = preg_replace('!\s+!', ' ', $str );
+		$s = str_replace( ' >','>',$s );
+		$s = str_replace( '> ','>',$s );
+		$s = str_replace( ' +','+',$s );
+		$s = str_replace( '+ ','+',$s );
+		$s = str_replace( ' ~','~',$s );
+		$s = str_replace( '~ ','~',$s );
+		$a = preg_split( '/([\s>\+\~])/' , $s , -1 , PREG_SPLIT_DELIM_CAPTURE );
+		$even = true;
+		foreach ($a as $segment) {
+			if ($even) {
+				$retval[] = new SelectorSegment( $segment );
+			} else {
+				$retval[] = new SelectorOperator( $segment );
+			}
+			$even=!$even;
+		}
+		// var_dump( $str , $retval );
+		return $retval;
+	}
+
+
+	public function getSegments() {
+		if ($this->aSegments === null) {
+			$this->aSegments = $this->getSegmentsFromString( $this->sSelector );
+		}
+		return $this->aSegments;
+	}
+
 	public function getSpecificity() {
 		if ($this->iSpecificity === null) {
 			$a = 0;
@@ -71,9 +105,15 @@ class Selector {
 		return $this->iSpecificity;
 	}
 
+	public function isSegmentsMatching( $ts ) {
+		$os = $this->getSegments();
+		return false;
+	}
+
 	public function matchesWithCSSPath( $css_path ) {
 		// imbecil checking
-		return (strpos( $this->sSelector , $css_path )!==false);
+		$search_segments = $this->getSegmentsFromString( $css_path );
+		return $this->isSegmentsMatching( $search_segments );
 	}
 
 }
