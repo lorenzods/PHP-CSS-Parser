@@ -107,15 +107,15 @@ class Selector {
 	public function isSegmentsMatching( $ts ) {
 		$os = $this->getSegments();
 		// minimal, almost dumb design (only tags and classes supported)
-		foreach ($ts as $segment) {
-			if (!($segment instanceof SelectorSegment)) {
+		foreach ($ts as $target_segment) {
+			if (!($target_segment instanceof SelectorSegment)) {
 				continue;
 			}
-			if ($segment->hasTag()) {
-				if (!$segment->hasAnyClass()) { // css class: h2
+			if ($target_segment->hasTag()) {
+				if (!$target_segment->hasAnyClass()) { // css class: h2
 					foreach ($os as $s) {
 						if (!($s instanceof SelectorSegment)) continue;
-						if ($segment->getTag() != $s->getTag()) {
+						if ($target_segment->getTag() != $s->getTag()) {
 							continue;
 						}
 						return true;
@@ -123,7 +123,7 @@ class Selector {
 				} else {	// css class: h2.modal-panel
 					foreach ($os as $s) {
 						if (!($s instanceof SelectorSegment)) continue;
-						if ($segment->getTag() != $s->getTag()) {
+						if ($target_segment->getTag() != $s->getTag()) {
 							continue;
 						}
 						foreach ($s->getClasses() as $cls) {
@@ -134,11 +134,11 @@ class Selector {
 					}
 				}
 			} else {
-				if ($segment->hasAnyClass()) {	// css class: .modal-panel
+				if ($target_segment->hasAnyClass()) {	// css class: .modal-panel
 					foreach ($os as $s) {
 						if (!($s instanceof SelectorSegment)) continue;
-						foreach ($s->getClasses() as $cls) {
-							if ($os->hasSpecificClass( $cls )) {
+						foreach ($target_segment->getClasses() as $cls) {
+							if ($s->hasSpecificClass( $cls )) {
 								return true;
 							}
 						}
