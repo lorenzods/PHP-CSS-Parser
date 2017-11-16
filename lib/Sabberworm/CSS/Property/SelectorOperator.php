@@ -1,5 +1,7 @@
 <?php
 
+namespace Sabberworm\CSS\Property;
+
 class SelectorOperator {
 	const OP_GENERAL_CHILD = ' ';
 	const OP_IMMEDIATE_CHILD = '>';

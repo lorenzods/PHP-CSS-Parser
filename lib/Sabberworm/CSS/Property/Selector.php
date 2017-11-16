@@ -60,7 +60,7 @@ class Selector {
 	}
 
 
-	public function getSegmentsFromString( $str ) {
+	public function getSegmentedPathFromString( $str ) {
 		$delim = ' >+~';
 		$retval = array();
 		$s = preg_replace('!\s+!', ' ', $str );
@@ -80,14 +80,13 @@ class Selector {
 			}
 			$even=!$even;
 		}
-		// var_dump( $str , $retval );
 		return $retval;
 	}
 
 
 	public function getSegments() {
 		if ($this->aSegments === null) {
-			$this->aSegments = $this->getSegmentsFromString( $this->sSelector );
+			$this->aSegments = $this->getSegmentedPathFromString( $this->sSelector );
 		}
 		return $this->aSegments;
 	}
@@ -107,12 +106,53 @@ class Selector {
 
 	public function isSegmentsMatching( $ts ) {
 		$os = $this->getSegments();
+		// minimal, almost dumb design (only tags and classes supported)
+		foreach ($ts as $segment) {
+			if (!($segment instanceof SelectorSegment)) {
+				continue;
+			}
+			if ($segment->hasTag()) {
+				if (!$segment->hasAnyClass()) { // css class: h2
+					foreach ($os as $s) {
+						if (!($s instanceof SelectorSegment)) continue;
+						if ($segment->getTag() != $s->getTag()) {
+							continue;
+						}
+						return true;
+					}
+				} else {	// css class: h2.modal-panel
+					foreach ($os as $s) {
+						if (!($s instanceof SelectorSegment)) continue;
+						if ($segment->getTag() != $s->getTag()) {
+							continue;
+						}
+						foreach ($s->getClasses() as $cls) {
+							if ($os->hasSpecificClass( $cls )) {
+								return true;
+							}
+						}
+					}
+				}
+			} else {
+				if ($segment->hasAnyClass()) {	// css class: .modal-panel
+					foreach ($os as $s) {
+						if (!($s instanceof SelectorSegment)) continue;
+						foreach ($s->getClasses() as $cls) {
+							if ($os->hasSpecificClass( $cls )) {
+								return true;
+							}
+						}
+					}
+
+				}
+			}
+		}
 		return false;
 	}
 
 	public function matchesWithCSSPath( $css_path ) {
 		// imbecil checking
-		$search_segments = $this->getSegmentsFromString( $css_path );
+		$search_segments = $this->getSegmentedPathFromString( $css_path );
 		return $this->isSegmentsMatching( $search_segments );
 	}
 
