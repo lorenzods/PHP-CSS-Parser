@@ -38,6 +38,7 @@ class Selector {
 	private $sSelector;
 	private $iSpecificity;
 	private $aSegments = null;
+	private $debug = false;
 
 	public function __construct($sSelector, $bCalculateSpecificity = false) {
 		$this->setSelector($sSelector);
@@ -118,16 +119,19 @@ class Selector {
 						if ($target_segment->getTag() != $s->getTag()) {
 							continue;
 						}
+						if ($s->hasAnyClass()) continue;
 						return true;
 					}
 				} else {	// css class: h2.modal-panel
 					foreach ($os as $s) {
 						if (!($s instanceof SelectorSegment)) continue;
-						if ($target_segment->getTag() != $s->getTag()) {
-							continue;
+						if ($s->hasTag()) {
+							if ($target_segment->getTag() != $s->getTag()) {
+								continue;
+							}
 						}
-						foreach ($s->getClasses() as $cls) {
-							if ($os->hasSpecificClass( $cls )) {
+						foreach ($target_segment->getClasses() as $cls) {
+							if ($s->hasSpecificClass( $cls )) {
 								return true;
 							}
 						}
@@ -153,7 +157,8 @@ class Selector {
 	public function matchesWithCSSPath( $css_path ) {
 		// imbecil checking
 		$search_segments = $this->getSegmentedPathFromString( $css_path );
-		return $this->isSegmentsMatching( $search_segments );
+		$retval = $this->isSegmentsMatching( $search_segments );
+		return $retval;
 	}
 
 }
